@@ -1,26 +1,191 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* 页面 / 卡片底色 */
+  --color-page: #f5f1e8;
+  --color-card: #faf7f2;
+  --color-card-white: #ffffff;
+
+  /* 主色系（鼠尾草绿） */
+  --color-sage: #8a9a6d;
+  --color-sage-deep: #7d9068;
+  --color-sage-light: #a9b58a;
+  --color-sage-text: #6f7d54;
+  --color-sage-chip: #eef0e4;
+
+  /* 辅色 / 点缀 */
+  --color-sand: #c9a86a;
+  --color-clay: #c98a7a;
+  --color-sunset: #e6a86a;
+  --color-sunset-light: #f0c98a;
+  --color-cream-chip: #f3eee3;
+
+  /* 文字 */
+  --color-ink: #3a362d;
+  --color-ink-secondary: rgba(58, 54, 45, 0.55);
+  --color-ink-faint: rgba(58, 54, 45, 0.4);
+
+  /* 分隔线 */
+  --color-hairline: rgba(0, 0, 0, 0.05);
+
+  /* 阴影 */
+  --shadow-card: 0 4px 14px rgba(90, 84, 64, 0.08);
+  --shadow-hero: 0 10px 24px rgba(125, 144, 104, 0.3);
+  --shadow-btn: 0 6px 16px rgba(138, 154, 109, 0.35);
+  --shadow-fab: 0 10px 22px rgba(201, 168, 106, 0.45);
+  --shadow-shell: 0 24px 70px rgba(70, 64, 50, 0.2);
+  --shadow-sheet: 0 -12px 40px rgba(0, 0, 0, 0.18);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-page: var(--color-page);
+  --color-card: var(--color-card);
+  --color-card-white: var(--color-card-white);
+  --color-sage: var(--color-sage);
+  --color-sage-deep: var(--color-sage-deep);
+  --color-sage-light: var(--color-sage-light);
+  --color-sage-text: var(--color-sage-text);
+  --color-sage-chip: var(--color-sage-chip);
+  --color-sand: var(--color-sand);
+  --color-clay: var(--color-clay);
+  --color-sunset: var(--color-sunset);
+  --color-sunset-light: var(--color-sunset-light);
+  --color-cream-chip: var(--color-cream-chip);
+  --color-ink: var(--color-ink);
+  --color-ink-secondary: var(--color-ink-secondary);
+  --color-ink-faint: var(--color-ink-faint);
+  --color-hairline: var(--color-hairline);
+  --font-sans: var(--font-nunito), "PingFang SC", system-ui, -apple-system, sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+html,
+body {
+  height: 100%;
+  overscroll-behavior-y: none;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-page);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+}
+
+button {
+  font-family: inherit;
+}
+
+input,
+textarea {
+  font-family: inherit;
+}
+
+/* 斜纹占位封面 */
+.diagonal-cover {
+  background-image: repeating-linear-gradient(
+    45deg,
+    var(--c1, #e7ddc8) 0,
+    var(--c1, #e7ddc8) 8px,
+    var(--c2, #efe7d6) 8px,
+    var(--c2, #efe7d6) 16px
+  );
+}
+
+@keyframes seed-fall {
+  0% {
+    transform: translateY(-8px) rotate(45deg);
+    opacity: 0;
+  }
+  40% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(28px) rotate(45deg);
+    opacity: 0;
+  }
+}
+.animate-seed-fall {
+  animation: seed-fall 0.9s ease-in-out;
+}
+
+@keyframes grow-in {
+  0% {
+    transform: scaleY(0.35);
+    opacity: 0;
+    transform-origin: bottom;
+  }
+  100% {
+    transform: scaleY(1);
+    opacity: 1;
+    transform-origin: bottom;
+  }
+}
+.animate-grow-in {
+  animation: grow-in 0.7s ease-in-out;
+}
+
+@keyframes sink {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(10px);
+  }
+}
+.animate-sink {
+  animation: sink 6s ease-in-out infinite alternate;
+}
+
+@keyframes sway {
+  0% {
+    transform: rotate(-2.2deg);
+  }
+  100% {
+    transform: rotate(2.2deg);
+  }
+}
+.animate-sway {
+  animation: sway 4s ease-in-out infinite alternate;
+  transform-origin: bottom;
+}
+
+@keyframes breathe {
+  0% {
+    transform: scale(1);
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(1.06);
+    opacity: 1;
+  }
+}
+.animate-breathe {
+  animation: breathe 3.5s ease-in-out infinite alternate;
+}
+
+@keyframes sheet-up {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+.animate-sheet-up {
+  animation: sheet-up 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.animate-fade-in {
+  animation: fade-in 0.25s ease-out;
 }
