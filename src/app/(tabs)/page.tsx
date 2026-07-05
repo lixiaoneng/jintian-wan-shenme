@@ -13,7 +13,7 @@ import {
   greetingForNow,
   pickRandomWantIdea,
 } from "@/lib/recommend";
-import { IdeaCover } from "@/components/IdeaCover";
+import { ideaVisual } from "@/lib/idea-visual";
 
 type TodayPick = { ideaId: string; seed: number };
 
@@ -179,24 +179,38 @@ export default function TodayPage() {
         </Link>
       </div>
       <div className="flex gap-[14px] overflow-x-auto pb-[8px]">
-        {recentIdeas.map((idea) => (
-          <button
-            key={idea.id}
-            onClick={() => openIdeaDetail(idea)}
-            className="w-[150px] flex-none overflow-hidden rounded-[20px] bg-white text-left active:scale-[.98] transition-transform"
-            style={{ boxShadow: "var(--shadow-card)" }}
-          >
-            <IdeaCover id={idea.id} />
-            <div style={{ padding: "12px 13px" }}>
-              <div className="text-[14.5px] font-bold leading-[1.35] text-ink">
+        {recentIdeas.map((idea) => {
+          const v = ideaVisual(idea.text);
+          return (
+            <button
+              key={idea.id}
+              onClick={() => openIdeaDetail(idea)}
+              className="flex w-[150px] flex-none flex-col rounded-[20px] p-[14px] text-left active:scale-[.98] transition-transform"
+              style={{ background: v.bg, boxShadow: "var(--shadow-card)", minHeight: 132 }}
+            >
+              <div
+                className="flex h-[36px] w-[36px] items-center justify-center rounded-[12px] text-[20px]"
+                style={{ background: v.iconBg }}
+              >
+                {v.icon}
+              </div>
+              <div
+                className="mt-[10px] text-[14.5px] font-bold leading-[1.35] text-ink"
+                style={{
+                  display: "-webkit-box",
+                  WebkitLineClamp: 2,
+                  WebkitBoxOrient: "vertical",
+                  overflow: "hidden",
+                }}
+              >
                 {idea.text}
               </div>
-              <div className="mt-[5px] text-[12px] text-ink-faint">
-                {daysAgoLabel(idea.created_at)}种下
+              <div className="mt-auto pt-[10px] text-[12px] text-ink-faint">
+                📅 {daysAgoLabel(idea.created_at)}种下
               </div>
-            </div>
-          </button>
-        ))}
+            </button>
+          );
+        })}
         {recentIdeas.length === 0 && ideas && (
           <div className="py-[12px] text-[13.5px] text-ink-faint">
             先记下第一个念头吧～

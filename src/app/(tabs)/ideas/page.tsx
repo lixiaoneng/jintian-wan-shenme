@@ -6,8 +6,7 @@ import { useAppState } from "@/lib/app-state";
 import { listIdeas } from "@/lib/storage";
 import type { Idea, IdeaStatus } from "@/lib/types";
 import { daysAgoLabel } from "@/lib/recommend";
-import { IdeaCover } from "@/components/IdeaCover";
-import { GrowthBadge } from "@/components/GrowthBadge";
+import { ideaVisual } from "@/lib/idea-visual";
 
 const FILTERS: { value: IdeaStatus | "all"; label: string }[] = [
   { value: "all", label: "全部" },
@@ -74,41 +73,43 @@ export default function IdeasPage() {
           </div>
         )}
         <div className="grid grid-cols-2 gap-[14px]">
-          {filtered.map((idea) => (
-            <button
-              key={idea.id}
-              onClick={() => openIdeaDetail(idea)}
-              className="overflow-hidden rounded-[20px] bg-white text-left active:scale-[.98] transition-transform"
-              style={{ boxShadow: "var(--shadow-card)" }}
-            >
-              <IdeaCover id={idea.id} height={100}>
-                {idea.status === "tried" && (
-                  <span
-                    className="absolute right-[9px] top-[9px] rounded-full px-[9px] py-[3px] text-[11px] font-semibold text-white"
-                    style={{ background: "var(--color-sage)" }}
-                  >
-                    ✿ 试过
-                  </span>
-                )}
-              </IdeaCover>
-              <div style={{ padding: "12px 13px" }}>
-                <div className="text-[14.5px] font-bold leading-[1.35] text-ink">
+          {filtered.map((idea) => {
+            const v = ideaVisual(idea.text);
+            return (
+              <button
+                key={idea.id}
+                onClick={() => openIdeaDetail(idea)}
+                className="flex flex-col rounded-[20px] p-[16px] text-left active:scale-[.98] transition-transform"
+                style={{ background: v.bg, boxShadow: "var(--shadow-card)", minHeight: 152 }}
+              >
+                <div
+                  className="flex h-[40px] w-[40px] items-center justify-center rounded-[13px] text-[22px]"
+                  style={{ background: v.iconBg }}
+                >
+                  {v.icon}
+                </div>
+                <div
+                  className="mt-[12px] text-[15px] font-bold leading-[1.35] text-ink"
+                  style={{
+                    display: "-webkit-box",
+                    WebkitLineClamp: 2,
+                    WebkitBoxOrient: "vertical",
+                    overflow: "hidden",
+                  }}
+                >
                   {idea.text}
                 </div>
-                <div className="mt-[5px] flex items-center justify-between gap-[6px] text-[12px] text-ink-faint">
-                  <span>
-                    {daysAgoLabel(idea.created_at)}
-                    {idea.status === "tried" ? ` · 试过 ${idea.plays_count} 次` : " · 还想试"}
-                  </span>
+                <div className="mt-auto flex items-center gap-[10px] pt-[14px] text-[12px] text-ink-faint">
+                  {idea.status === "tried" ? (
+                    <span>✨ 试过 {idea.plays_count} 次</span>
+                  ) : (
+                    <span>🏷️ 还想试</span>
+                  )}
+                  <span>📅 {daysAgoLabel(idea.created_at)}</span>
                 </div>
-                {idea.status === "tried" && (
-                  <div className="mt-[6px]">
-                    <GrowthBadge stage={idea.growth_stage} />
-                  </div>
-                )}
-              </div>
-            </button>
-          ))}
+              </button>
+            );
+          })}
         </div>
       </div>
       <div className="h-[120px] flex-none" />

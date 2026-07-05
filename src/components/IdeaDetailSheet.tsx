@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { deleteIdea, updateIdea } from "@/lib/storage";
 import { generateAction } from "@/lib/recommend";
+import { ideaVisual } from "@/lib/idea-visual";
 import { IDEA_TAGS, type Idea, type IdeaTag } from "@/lib/types";
 import { useAppState } from "@/lib/app-state";
 
@@ -15,6 +16,7 @@ export function IdeaDetailSheet({ idea, onClose }: { idea: Idea; onClose: () => 
   const trimmed = text.trim();
   const dirty = trimmed !== idea.text || tag !== idea.tag;
   const canSave = trimmed.length > 0 && dirty;
+  const v = ideaVisual(trimmed || idea.text);
 
   async function persistIfNeeded(): Promise<Idea> {
     if (canSave) {
@@ -85,11 +87,19 @@ export function IdeaDetailSheet({ idea, onClose }: { idea: Idea; onClose: () => 
           style={{ background: "rgba(58,54,45,.15)" }}
         />
 
-        <div className="flex items-baseline justify-between">
-          <span className="text-[16px] font-bold text-ink">这颗念头</span>
-          <span className="text-[12.5px] text-ink-faint">
-            {idea.status === "tried" ? `已经玩过 ${idea.plays_count} 次` : "还想找时间试试"}
-          </span>
+        <div className="flex items-center gap-[12px]">
+          <div
+            className="flex h-[44px] w-[44px] flex-none items-center justify-center rounded-[14px] text-[22px]"
+            style={{ background: v.iconBg }}
+          >
+            {v.icon}
+          </div>
+          <div className="flex flex-1 flex-col">
+            <span className="text-[16px] font-bold text-ink">这颗念头</span>
+            <span className="text-[12.5px] text-ink-faint">
+              {idea.status === "tried" ? `已经玩过 ${idea.plays_count} 次` : "还想找时间试试"}
+            </span>
+          </div>
         </div>
 
         <div
