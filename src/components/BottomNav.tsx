@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 const TABS = [
   { href: "/", label: "今天", icon: "today" },
   { href: "/ideas", label: "种草", icon: "leaf" },
-  { href: "/evening", label: "留给今天", icon: "moon" },
+  { href: "/notes", label: "随手记", icon: "note" },
   { href: "/forest", label: "博物馆", icon: "museum" },
 ] as const;
 
@@ -45,8 +45,24 @@ function TabIcon({
       />
     );
   }
-  if (icon === "moon") {
-    return <span className="text-[13px] leading-none">🌙</span>;
+  if (icon === "note") {
+    // 一张小卡片 + 两条横线，代表「随手记」
+    const c = active ? activeColor : inactiveColor;
+    return (
+      <div
+        className="flex flex-col items-center justify-center"
+        style={{
+          width: 13,
+          height: 11,
+          borderRadius: 3,
+          border: `1.6px solid ${c}`,
+          gap: 2,
+        }}
+      >
+        <span style={{ width: 6, height: 1.4, background: c }} />
+        <span style={{ width: 6, height: 1.4, background: c }} />
+      </div>
+    );
   }
   // museum：小小的博物馆立面（三角门楣 + 立柱）
   const color = active ? activeColor : inactiveColor;

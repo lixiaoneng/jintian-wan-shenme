@@ -4,9 +4,10 @@
 // 数据模型（与产品概念一致）：
 //   ideas       念头 / 种草
 //   activities  一次「试试看」的体验
-//   reflections 做完留一句 / 留给今天
+//   reflections 做完留一句
+//   notes       随手记（想到什么记一条）
 
-import type { Activity, GrowthStage, Idea, IdeaTag, Reflection } from "./types";
+import type { Activity, GrowthStage, Idea, IdeaTag, Note, Reflection } from "./types";
 
 // 单机版没有真正的登录，用一个固定用户占位，方便以后接多用户。
 export const LOCAL_USER_ID = "local-user";
@@ -23,10 +24,11 @@ type DB = {
   ideas: Idea[];
   activities: Activity[];
   reflections: Reflection[];
+  notes: Note[];
 };
 
 function emptyDB(): DB {
-  return { ideas: [], activities: [], reflections: [] };
+  return { ideas: [], activities: [], reflections: [], notes: [] };
 }
 
 function read(): DB {
@@ -34,7 +36,9 @@ function read(): DB {
   const raw = window.localStorage.getItem(LS_KEY);
   if (raw) {
     try {
-      return JSON.parse(raw) as DB;
+      const parsed = JSON.parse(raw) as Partial<DB>;
+      // 与默认结构合并，兼容早期没有 notes 字段的本地数据
+      return { ...emptyDB(), ...parsed };
     } catch {
       // 数据损坏就当作空库
     }
@@ -115,8 +119,23 @@ function seedReflection(
     type: "activity",
     text,
     mood,
-    answers: null,
     created_at: daysAgo(completedDaysAgo, 10),
+  };
+}
+
+function seedNote(
+  id: string,
+  text: string,
+  ideaId: string | null,
+  createdDaysAgo: number
+): Note {
+  return {
+    id,
+    user_id: LOCAL_USER_ID,
+    text,
+    idea_id: ideaId,
+    created_at: daysAgo(createdDaysAgo, 14),
+    updated_at: daysAgo(createdDaysAgo, 14),
   };
 }
 
@@ -153,7 +172,17 @@ function seed(): DB {
     seedReflection("d-ref-camping", "d-act-camping", "d-camping", "有人回应了，还挺开心", "超喜欢", 5),
   ];
 
-  return { ideas, activities, reflections };
+  // 随手记：一部分关联到念头（详情里会显示「🌱 来自」），一部分是普通记录
+  const notes: Note[] = [
+    seedNote("d-note-coffee", "今天突然觉得想学做手冲咖啡，最近老想喝一杯自己冲的。", "d-coffee", 0),
+    seedNote("d-note-suno", "看到别人用 Suno 做歌，好神奇，改天也想自己瞎编一首。", "d-suno", 1),
+    seedNote("d-note-japan", "以后想去日本看看，尤其是京都的秋天，据说很好看。", "d-japan", 2),
+    seedNote("d-note-plant", "刚路过一家花店，想在家养点很好活的小植物。", null, 3),
+    seedNote("d-note-quote", "看到一句话：慢慢来，比较快。想记下来提醒自己。", null, 5),
+    seedNote("d-note-camping", "把露营装备清单整理一下，下次说走就走。", "d-camping", 7),
+  ];
+
+  return { ideas, activities, reflections, notes };
 }
 
 /** 首次打开且本地为空时，写入 demo 数据 */
@@ -274,10 +303,8 @@ export async function createReflection(input: {
   userId?: string;
   activityId?: string | null;
   ideaId?: string | null;
-  type: "activity" | "evening";
   text?: string | null;
   mood?: string | null;
-  answers?: { q: string; text: string }[] | null;
 }): Promise<Reflection> {
   const db = read();
   const reflection: Reflection = {
@@ -285,15 +312,59 @@ export async function createReflection(input: {
     user_id: LOCAL_USER_ID,
     activity_id: input.activityId ?? null,
     idea_id: input.ideaId ?? null,
-    type: input.type,
+    type: "activity",
     text: input.text ?? null,
     mood: input.mood ?? null,
-    answers: input.answers ?? null,
     created_at: new Date().toISOString(),
   };
   db.reflections.push(reflection);
   write(db);
   return reflection;
+}
+
+// ============ 随手记 notes ============
+
+export async function getIdea(id: string): Promise<Idea | null> {
+  return read().ideas.find((i) => i.id === id) ?? null;
+}
+
+export async function listNotes(_userId?: string): Promise<Note[]> {
+  return [...read().notes].sort((a, b) => b.created_at.localeCompare(a.created_at));
+}
+
+export async function createNote(
+  text: string,
+  ideaId: string | null = null
+): Promise<Note> {
+  const db = read();
+  const now = new Date().toISOString();
+  const note: Note = {
+    id: uuid(),
+    user_id: LOCAL_USER_ID,
+    text,
+    idea_id: ideaId,
+    created_at: now,
+    updated_at: now,
+  };
+  db.notes.unshift(note);
+  write(db);
+  return note;
+}
+
+export async function updateNote(id: string, text: string): Promise<Note> {
+  const db = read();
+  const found = db.notes.find((n) => n.id === id);
+  if (!found) throw new Error("note not found: " + id);
+  found.text = text;
+  found.updated_at = new Date().toISOString();
+  write(db);
+  return found;
+}
+
+export async function deleteNote(id: string): Promise<void> {
+  const db = read();
+  db.notes = db.notes.filter((n) => n.id !== id);
+  write(db);
 }
 
 // 一件「藏品」：一次完成的体验 + 来自的念头 + 留下的一句话/心情

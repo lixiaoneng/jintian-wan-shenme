@@ -33,16 +33,24 @@ export type Activity = {
   created_at: string;
 };
 
-export type ReflectionType = "activity" | "evening";
-
+// 做完体验后留下的一句话（只剩这一种反思；「留给今天」已删除）
 export type Reflection = {
   id: string;
   user_id: string;
   activity_id: string | null;
   idea_id: string | null;
-  type: ReflectionType;
+  type: "activity";
   text: string | null;
   mood: string | null;
-  answers: { q: string; text: string }[] | null;
   created_at: string;
+};
+
+// 随手记：想到什么就记一条，可选地关联一个念头
+export type Note = {
+  id: string;
+  user_id: string;
+  text: string;
+  idea_id: string | null;
+  created_at: string;
+  updated_at: string;
 };

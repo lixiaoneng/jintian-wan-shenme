@@ -62,7 +62,6 @@ export function ExperienceOverlay({
           userId,
           activityId,
           ideaId: idea.id,
-          type: "activity",
           text: text.trim() || null,
           mood,
         });

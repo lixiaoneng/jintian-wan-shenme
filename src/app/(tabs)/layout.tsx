@@ -6,6 +6,8 @@ import { Fab } from "@/components/Fab";
 import { SparkSheet } from "@/components/SparkSheet";
 import { IdeaDetailSheet } from "@/components/IdeaDetailSheet";
 import { ExperienceOverlay } from "@/components/ExperienceOverlay";
+import { NoteComposer } from "@/components/NoteComposer";
+import { NoteDetailSheet } from "@/components/NoteDetailSheet";
 
 function Shell({ children }: { children: React.ReactNode }) {
   const { overlay, closeOverlay } = useAppState();
@@ -26,6 +28,10 @@ function Shell({ children }: { children: React.ReactNode }) {
           actionText={overlay.actionText}
           onClose={closeOverlay}
         />
+      )}
+      {overlay.type === "note" && <NoteComposer onClose={closeOverlay} />}
+      {overlay.type === "noteDetail" && (
+        <NoteDetailSheet note={overlay.note} onClose={closeOverlay} />
       )}
     </div>
   );
