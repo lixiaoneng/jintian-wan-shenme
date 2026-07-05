@@ -4,6 +4,7 @@ import { AppStateProvider, useAppState } from "@/lib/app-state";
 import { BottomNav } from "@/components/BottomNav";
 import { Fab } from "@/components/Fab";
 import { SparkSheet } from "@/components/SparkSheet";
+import { IdeaDetailSheet } from "@/components/IdeaDetailSheet";
 import { ExperienceOverlay } from "@/components/ExperienceOverlay";
 
 function Shell({ children }: { children: React.ReactNode }) {
@@ -16,6 +17,9 @@ function Shell({ children }: { children: React.ReactNode }) {
       <BottomNav />
 
       {overlay.type === "spark" && <SparkSheet onClose={closeOverlay} />}
+      {overlay.type === "ideaDetail" && (
+        <IdeaDetailSheet idea={overlay.idea} onClose={closeOverlay} />
+      )}
       {overlay.type === "experience" && (
         <ExperienceOverlay
           idea={overlay.idea}

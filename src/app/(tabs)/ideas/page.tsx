@@ -17,7 +17,7 @@ const FILTERS: { value: IdeaStatus | "all"; label: string }[] = [
 
 export default function IdeasPage() {
   const { userId, ready } = useSession();
-  const { refreshKey } = useAppState();
+  const { refreshKey, openIdeaDetail } = useAppState();
   const [ideas, setIdeas] = useState<Idea[] | null>(null);
   const [filter, setFilter] = useState<IdeaStatus | "all">("all");
 
@@ -75,9 +75,10 @@ export default function IdeasPage() {
         )}
         <div className="grid grid-cols-2 gap-[14px]">
           {filtered.map((idea) => (
-            <div
+            <button
               key={idea.id}
-              className="overflow-hidden rounded-[20px] bg-white"
+              onClick={() => openIdeaDetail(idea)}
+              className="overflow-hidden rounded-[20px] bg-white text-left active:scale-[.98] transition-transform"
               style={{ boxShadow: "var(--shadow-card)" }}
             >
               <IdeaCover id={idea.id} height={100}>
@@ -106,7 +107,7 @@ export default function IdeasPage() {
                   </div>
                 )}
               </div>
-            </div>
+            </button>
           ))}
         </div>
       </div>

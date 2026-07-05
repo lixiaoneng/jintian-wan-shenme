@@ -24,7 +24,7 @@ function todayKey() {
 
 export default function TodayPage() {
   const { userId, ready } = useSession();
-  const { openExperience, refreshKey } = useAppState();
+  const { openExperience, openIdeaDetail, refreshKey } = useAppState();
   const [ideas, setIdeas] = useState<Idea[] | null>(null);
   const [pick, setPick] = useState<TodayPick | null>(null);
   const [continuity, setContinuity] = useState<string | null>(null);
@@ -180,9 +180,10 @@ export default function TodayPage() {
       </div>
       <div className="flex gap-[14px] overflow-x-auto pb-[8px]">
         {recentIdeas.map((idea) => (
-          <div
+          <button
             key={idea.id}
-            className="w-[150px] flex-none overflow-hidden rounded-[20px] bg-white"
+            onClick={() => openIdeaDetail(idea)}
+            className="w-[150px] flex-none overflow-hidden rounded-[20px] bg-white text-left active:scale-[.98] transition-transform"
             style={{ boxShadow: "var(--shadow-card)" }}
           >
             <IdeaCover id={idea.id} />
@@ -194,7 +195,7 @@ export default function TodayPage() {
                 {daysAgoLabel(idea.created_at)}种下
               </div>
             </div>
-          </div>
+          </button>
         ))}
         {recentIdeas.length === 0 && ideas && (
           <div className="py-[12px] text-[13.5px] text-ink-faint">

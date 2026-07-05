@@ -6,11 +6,13 @@ import type { Idea } from "./types";
 type Overlay =
   | { type: "none" }
   | { type: "spark" }
+  | { type: "ideaDetail"; idea: Idea }
   | { type: "experience"; idea: Idea; actionText: string };
 
 type AppStateValue = {
   overlay: Overlay;
   openSpark: () => void;
+  openIdeaDetail: (idea: Idea) => void;
   openExperience: (idea: Idea, actionText: string) => void;
   closeOverlay: () => void;
   refreshKey: number;
@@ -24,6 +26,10 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
   const [refreshKey, setRefreshKey] = useState(0);
 
   const openSpark = useCallback(() => setOverlay({ type: "spark" }), []);
+  const openIdeaDetail = useCallback(
+    (idea: Idea) => setOverlay({ type: "ideaDetail", idea }),
+    []
+  );
   const openExperience = useCallback(
     (idea: Idea, actionText: string) =>
       setOverlay({ type: "experience", idea, actionText }),
@@ -33,8 +39,16 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
   const bumpRefresh = useCallback(() => setRefreshKey((k) => k + 1), []);
 
   const value = useMemo(
-    () => ({ overlay, openSpark, openExperience, closeOverlay, refreshKey, bumpRefresh }),
-    [overlay, openSpark, openExperience, closeOverlay, refreshKey, bumpRefresh]
+    () => ({
+      overlay,
+      openSpark,
+      openIdeaDetail,
+      openExperience,
+      closeOverlay,
+      refreshKey,
+      bumpRefresh,
+    }),
+    [overlay, openSpark, openIdeaDetail, openExperience, closeOverlay, refreshKey, bumpRefresh]
   );
 
   return <AppStateContext.Provider value={value}>{children}</AppStateContext.Provider>;

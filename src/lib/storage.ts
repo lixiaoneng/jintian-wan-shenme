@@ -122,13 +122,16 @@ function seedReflection(
 
 function seed(): DB {
   const ideas: Idea[] = [
+    // 已经试过的（会进博物馆）
     seedIdea("d-suno", "用 Suno 做歌", "do", "tried", 2, 8),
     seedIdea("d-coffee", "学做手冲咖啡", "eat", "tried", 1, 6),
     seedIdea("d-exam", "准备成人自考", "learn", "tried", 1, 5),
-    seedIdea("d-gym", "去健身房", "do", "tried", 3, 10),
+    seedIdea("d-gym", "去健身房", "do", "tried", 1, 10),
     seedIdea("d-camping", "运营露营小助手群", "do", "tried", 1, 7),
+    // 还没试过的（≥3 条，可被今日推荐抽中）
     seedIdea("d-japan", "去日本", "go", "want", 0, 2),
     seedIdea("d-vibecoding", "做 vibe coding", "do", "want", 0, 1),
+    seedIdea("d-pottery", "去玩一次陶艺", "do", "want", 0, 3),
   ];
 
   const activities: Activity[] = [
@@ -140,12 +143,13 @@ function seed(): DB {
     seedActivity("d-act-camping", "d-camping", "在群里发了第一条露营攻略", 5),
   ];
 
+  // 注意：故意让「去健身房」这条完成活动没有 reflection，
+  // 用来验证博物馆在无留言时会显示默认句「这件小事真的发生过。」
   const reflections: Reflection[] = [
     seedReflection("d-ref-suno-1", "d-act-suno-1", "d-suno", "比想象中好玩，AI 编的词还挺离谱", "还不错", 6),
     seedReflection("d-ref-suno-2", "d-act-suno-2", "d-suno", "又更离谱了，但我居然有点喜欢", "超喜欢", 0),
     seedReflection("d-ref-coffee", "d-act-coffee", "d-coffee", "有点酸，下次少放点粉", "还不错", 3),
     seedReflection("d-ref-exam", "d-act-exam", "d-exam", "没那么可怕，先报一门试试", "下次还想", 2),
-    seedReflection("d-ref-gym", "d-act-gym", "d-gym", "其实没有那么可怕", "一般般", 9),
     seedReflection("d-ref-camping", "d-act-camping", "d-camping", "有人回应了，还挺开心", "超喜欢", 5),
   ];
 
@@ -196,6 +200,32 @@ export async function createIdea(
   db.ideas.unshift(idea);
   write(db);
   return idea;
+}
+
+export async function updateIdea(
+  id: string,
+  patch: { text?: string; tag?: IdeaTag | null }
+): Promise<Idea> {
+  const db = read();
+  const found = db.ideas.find((i) => i.id === id);
+  if (!found) throw new Error("idea not found: " + id);
+  if (patch.text !== undefined) found.text = patch.text;
+  if (patch.tag !== undefined) found.tag = patch.tag;
+  found.updated_at = new Date().toISOString();
+  write(db);
+  return found;
+}
+
+/** 删除一个念头，并级联删掉它相关的体验和留言，避免博物馆出现悬空藏品。 */
+export async function deleteIdea(id: string): Promise<void> {
+  const db = read();
+  const activityIds = db.activities.filter((a) => a.idea_id === id).map((a) => a.id);
+  db.ideas = db.ideas.filter((i) => i.id !== id);
+  db.activities = db.activities.filter((a) => a.idea_id !== id);
+  db.reflections = db.reflections.filter(
+    (r) => r.idea_id !== id && !(r.activity_id && activityIds.includes(r.activity_id))
+  );
+  write(db);
 }
 
 export async function createActivity(

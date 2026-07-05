@@ -35,6 +35,14 @@ function exhibitEmoji(idea: Idea): string {
   return TAG_EMOJI[idea.tag as IdeaTag] ?? "🖼️";
 }
 
+// 展品标题：像展签，而不是任务记录。第一次 vs 第 N 次。
+function exhibitTitle(ideaText: string, ordinal: number): string {
+  if (ordinal <= 1) return `第一次碰了碰：${ideaText}`;
+  return `第 ${ordinal} 次试了试：${ideaText}`;
+}
+
+const DEFAULT_REFLECTION = "这件小事真的发生过。";
+
 const MOOD_TAG_STYLE: Record<string, { fg: string; bg: string }> = {
   超喜欢: { fg: "#c46a58", bg: "#f6e4df" },
   还不错: { fg: "#6f7d54", bg: "#eef0e4" },
@@ -90,18 +98,18 @@ export default function MuseumPage() {
     }).length;
   }, [entries]);
 
-  // 每个念头最早的一次体验 = 「第一次」。列表按时间倒序，故同一念头最后出现的是最早那次。
-  const firstActivityIds = useMemo(() => {
-    const set = new Set<string>();
-    const seen = new Set<string>();
+  // 每件藏品在「它所属念头」里是第几次体验（按时间从早到晚数）。
+  // 列表按时间倒序，所以从后往前遍历、逐念头累加，得到 1、2、3…
+  const ordinalByActivityId = useMemo(() => {
+    const map = new Map<string, number>();
+    const countByIdea = new Map<string, number>();
     for (let i = (entries?.length ?? 0) - 1; i >= 0; i--) {
       const e = entries![i];
-      if (!seen.has(e.idea.id)) {
-        seen.add(e.idea.id);
-        set.add(e.activity.id);
-      }
+      const next = (countByIdea.get(e.idea.id) ?? 0) + 1;
+      countByIdea.set(e.idea.id, next);
+      map.set(e.activity.id, next);
     }
-    return set;
+    return map;
   }, [entries]);
 
   const total = entries?.length ?? 0;
@@ -161,7 +169,8 @@ export default function MuseumPage() {
         <div className="flex flex-col gap-[14px]">
           {entries?.map((entry, index) => {
             const collectionNo = String(total - index).padStart(3, "0");
-            const isFirst = firstActivityIds.has(entry.activity.id);
+            const ordinal = ordinalByActivityId.get(entry.activity.id) ?? 1;
+            const isFirst = ordinal <= 1;
             const moodStyle = entry.mood ? MOOD_TAG_STYLE[entry.mood] : null;
             return (
               <div
@@ -194,13 +203,11 @@ export default function MuseumPage() {
                   </div>
                   <div className="flex-1">
                     <div className="text-[15px] font-bold leading-[1.35] text-ink">
-                      {entry.activity.action_text}
+                      {exhibitTitle(entry.idea.text, ordinal)}
                     </div>
-                    {entry.reflectionText && (
-                      <div className="mt-[4px] text-[13px] leading-[1.55] text-ink-secondary">
-                        「{entry.reflectionText}」
-                      </div>
-                    )}
+                    <div className="mt-[4px] text-[13px] leading-[1.55] text-ink-secondary">
+                      「{entry.reflectionText ?? DEFAULT_REFLECTION}」
+                    </div>
                     <div className="mt-[9px] flex flex-wrap gap-[6px]">
                       {isFirst && (
                         <span
