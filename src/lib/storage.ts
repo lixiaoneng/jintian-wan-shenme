@@ -322,6 +322,23 @@ export async function createReflection(input: {
   return reflection;
 }
 
+// 从博物馆取下一件藏品：删掉这次体验 + 它的留言，并把念头的「试过次数」同步减 1。
+export async function deleteActivity(activityId: string): Promise<void> {
+  const db = read();
+  const activity = db.activities.find((a) => a.id === activityId);
+  if (!activity) return;
+  db.activities = db.activities.filter((a) => a.id !== activityId);
+  db.reflections = db.reflections.filter((r) => r.activity_id !== activityId);
+  const idea = db.ideas.find((i) => i.id === activity.idea_id);
+  if (idea) {
+    idea.plays_count = Math.max(0, idea.plays_count - 1);
+    idea.growth_stage = growthStageForPlays(idea.plays_count);
+    if (idea.plays_count === 0) idea.status = "want";
+    idea.updated_at = new Date().toISOString();
+  }
+  write(db);
+}
+
 // ============ 随手记 notes ============
 
 export async function getIdea(id: string): Promise<Idea | null> {

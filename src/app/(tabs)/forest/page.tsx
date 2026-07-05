@@ -81,7 +81,7 @@ function MuseumFacade() {
 
 export default function MuseumPage() {
   const { userId, ready } = useSession();
-  const { refreshKey } = useAppState();
+  const { refreshKey, openExhibitDetail } = useAppState();
   const [entries, setEntries] = useState<ExhibitEntry[] | null>(null);
 
   useEffect(() => {
@@ -150,7 +150,7 @@ export default function MuseumPage() {
           )}
         </div>
         <div className="mb-[14px] text-[12.5px] text-ink-faint">
-          这些都是你认真生活过的证据
+          这些都是你认真生活过的证据 · 点一件可以查看或取下
         </div>
 
         {entries && entries.length === 0 && (
@@ -173,9 +173,10 @@ export default function MuseumPage() {
             const isFirst = ordinal <= 1;
             const moodStyle = entry.mood ? MOOD_TAG_STYLE[entry.mood] : null;
             return (
-              <div
+              <button
                 key={entry.activity.id}
-                className="overflow-hidden rounded-[20px] bg-white"
+                onClick={() => openExhibitDetail(entry)}
+                className="block w-full overflow-hidden rounded-[20px] bg-white text-left active:scale-[.99] transition-transform"
                 style={{ boxShadow: "var(--shadow-card)" }}
               >
                 {/* 展牌顶栏 */}
@@ -231,7 +232,7 @@ export default function MuseumPage() {
                     </div>
                   </div>
                 </div>
-              </div>
+              </button>
             );
           })}
         </div>

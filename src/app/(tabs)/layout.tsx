@@ -8,6 +8,7 @@ import { IdeaDetailSheet } from "@/components/IdeaDetailSheet";
 import { ExperienceOverlay } from "@/components/ExperienceOverlay";
 import { NoteComposer } from "@/components/NoteComposer";
 import { NoteDetailSheet } from "@/components/NoteDetailSheet";
+import { ExhibitDetailSheet } from "@/components/ExhibitDetailSheet";
 
 function Shell({ children }: { children: React.ReactNode }) {
   const { overlay, closeOverlay } = useAppState();
@@ -32,6 +33,9 @@ function Shell({ children }: { children: React.ReactNode }) {
       {overlay.type === "note" && <NoteComposer onClose={closeOverlay} />}
       {overlay.type === "noteDetail" && (
         <NoteDetailSheet note={overlay.note} onClose={closeOverlay} />
+      )}
+      {overlay.type === "exhibitDetail" && (
+        <ExhibitDetailSheet entry={overlay.entry} onClose={closeOverlay} />
       )}
     </div>
   );

@@ -2,6 +2,7 @@
 
 import { createContext, useCallback, useContext, useMemo, useState } from "react";
 import type { Idea, Note } from "./types";
+import type { ExhibitEntry } from "./storage";
 
 type Overlay =
   | { type: "none" }
@@ -9,7 +10,8 @@ type Overlay =
   | { type: "ideaDetail"; idea: Idea }
   | { type: "experience"; idea: Idea; actionText: string }
   | { type: "note" }
-  | { type: "noteDetail"; note: Note };
+  | { type: "noteDetail"; note: Note }
+  | { type: "exhibitDetail"; entry: ExhibitEntry };
 
 type AppStateValue = {
   overlay: Overlay;
@@ -18,6 +20,7 @@ type AppStateValue = {
   openExperience: (idea: Idea, actionText: string) => void;
   openNoteComposer: () => void;
   openNoteDetail: (note: Note) => void;
+  openExhibitDetail: (entry: ExhibitEntry) => void;
   closeOverlay: () => void;
   refreshKey: number;
   bumpRefresh: () => void;
@@ -44,6 +47,10 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
     (note: Note) => setOverlay({ type: "noteDetail", note }),
     []
   );
+  const openExhibitDetail = useCallback(
+    (entry: ExhibitEntry) => setOverlay({ type: "exhibitDetail", entry }),
+    []
+  );
   const closeOverlay = useCallback(() => setOverlay({ type: "none" }), []);
   const bumpRefresh = useCallback(() => setRefreshKey((k) => k + 1), []);
 
@@ -55,6 +62,7 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
       openExperience,
       openNoteComposer,
       openNoteDetail,
+      openExhibitDetail,
       closeOverlay,
       refreshKey,
       bumpRefresh,
@@ -66,6 +74,7 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
       openExperience,
       openNoteComposer,
       openNoteDetail,
+      openExhibitDetail,
       closeOverlay,
       refreshKey,
       bumpRefresh,
